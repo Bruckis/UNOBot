@@ -1,11 +1,12 @@
 const Discord = require('discord.js');
+require('dotenv').config()
 const client = new Discord.Client();
 
 client.once('ready', () => {
   console.log('Ready!') // Writes ready in the console when the bot has started
 });
 
-client.login('ODAzMjA3NzQyMjU2MTg1MzU1.YA6bgA.85xn1qFK8LJQv321-60KhzFj9aA'); //Logs into Discord and lets users interact with the bot
+client.login(process.env.TOKEN); //Logs into Discord and lets users interact with the bot
 
 client.on('message', message => { //When a user sends a message
   const prefix = "1"; //
