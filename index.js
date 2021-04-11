@@ -180,6 +180,11 @@ function generateDeck(numberofdecks) {
   }
 }
 
+function shufflenewdeck(){
+  generateDeck(1)
+  console.log("shuffled deck (sort of)")
+}
+
 
 
 client.login(process.env.TOKEN); //Logs into Discord and lets users interact with the bot
@@ -811,6 +816,10 @@ client.on(`message`, async message => { //When a user sends a message
 
           }
 
+          if(deck.length < 5){
+            shufflenewdeck();
+          }
+
           else{
             message.channel.send(`<@${message.member.id}> You do not have that card in your hand. Please play a card you do have in your hand.`)
             return;
@@ -892,9 +901,11 @@ client.on(`message`, async message => { //When a user sends a message
             .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
         await message.channel.send(game);
       }
+      if(deck.length < 5){
+        shufflenewdeck();
+      }
     }
     }
-
 
   if (cmd === "endgame"){
     if(message.member.hasPermission("ADMINISTRATOR")){
