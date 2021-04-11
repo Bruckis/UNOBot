@@ -1,0 +1,72 @@
+if(c = 1){
+  switch (n){
+    case 10:
+      card = {color:"RED", number:"REVERSE"}
+      deck.push(card);
+      break;
+    case 11:
+      card = {color:"RED", number:"SKIP"}
+      deck.push(card);
+      break;
+    case 12:
+      card = {color:"RED", number:"DRAW2"}
+      deck.push(card);
+      break;
+    default:
+    console.log('Something went wrong in the card generation, color was ${c} and number was ${n}')
+    }
+  }
+  else if(c = 2){
+    switch (n){
+      case 10:
+        card = {color:"GREEN", number:"REVERSE"}
+        deck.push(card);
+        break;
+      case 11:
+        card = {color:"GREEN", number:"SKIP"}
+        deck.push(card);
+        break;
+      case 12:
+        card = {color:"GREEN", number:"DRAW2"}
+        deck.push(card);
+        break;
+      default:
+      console.log('Something went wrong in the card generation, color was ${c} and number was ${n}')
+      }
+    }
+    else if(c = 3){
+      switch (n){
+        case 10:
+          card = {color:"BLUE", number:"REVERSE"}
+          deck.push(card);
+          break;
+        case 11:
+          card = {color:"BLUE", number:"SKIP"}
+          deck.push(card);
+          break;
+        case 12:
+          card = {color:"BLUE", number:"DRAW2"}
+          deck.push(card);
+          break;
+        default:
+        console.log('Something went wrong in the card generation, color was ${c} and number was ${n}')
+        }
+      }
+      else if(c = 4){
+        switch (n){
+          case 10:
+            card = {color:"YELLOW", number:"REVERSE"}
+            deck.push(card);
+            break;
+          case 11:
+            card = {color:"YELLOW", number:"SKIP"}
+            deck.push(card);
+            break;
+          case 12:
+            card = {color:"YELLOW", number:"DRAW2"}
+            deck.push(card);
+            break;
+          default:
+          console.log('Something went wrong in the card generation, color was ${c} and number was ${n}')
+          }
+        }
