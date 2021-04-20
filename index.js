@@ -1,6 +1,22 @@
 const Discord = require(`discord.js`);
 require(`dotenv`).config()
 const client = new Discord.Client();
+
+// Variables, arrays and objects
+const prefix = "1";
+var numberofdecks = 1; // The array we will be using to randomize cards
+var card;
+var today = new Date();
+var games = {}; //The object that stores every game
+let currentcard = [];
+let playedcards = [];
+let gamestarted = false;
+let positionofcard = 0;
+let turn = 0;
+let currentplayerid;
+let stopplay;
+let nextplayerid;
+let givecards;
 let deck = [];
 
 client.once(`ready`, () => {
@@ -191,21 +207,6 @@ function shufflenewdeck() {
 client.login(process.env.TOKEN); //Logs into Discord and lets users interact with the bot
 
 client.on(`message`, async message => { //When a user sends a message
-  // Variables, arrays and objects
-  const prefix = "1";
-  var numberofdecks = 1; // The array we will be using to randomize cards
-  var card;
-  var today = new Date();
-  var games = {}; //The object that stores every game
-  let currentcard = [];
-  let playedcards = [];
-  let gamestarted = false;
-  let positionofcard = 0;
-  let turn = 0;
-  let currentplayerid;
-  let stopplay;
-  let nextplayerid;
-  let givecards;
 
   if (message.author.bot) return; // Stops if the message is from a bot
   if (!message.content.startsWith(prefix)) return; // Stops if the message does not start with the set prefix
@@ -215,42 +216,42 @@ client.on(`message`, async message => { //When a user sends a message
 
   if (cmd === "help") {
     let helpembed = new Discord.MessageEmbed()
-      .setColor(`#ec1c25`)
-      .setTitle(`Help about commands`)
-      .setAuthor(`Made by Bruckis`, `https://images-ext-1.discordapp.net/external/xXLSVJM6_HvBZ9xla6EIPLdosfanGudNLPw10p4BAUk/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/391929236950351884/9be94849d0be47fe83e50c33c370dd7c.png`, `https://github.com/Bruckis`, )
-      .setDescription(`Here are all the commands the bot has and how to use them`)
-      .addFields({
-          name: "Info",
-          value: "This command provides some rules for the bot as well as basic information it."
-        }, {
-          name: "Startgame {decks} {startings cards}",
-          value: "The main command of the bot. Is used to start the game. {decks} defines the number of decks you want to use (usually you just need 1 because there is a deck reshuffler), but if you want chaos and the possibility of having 25 wildcards in your hand, you can make it so. {starting cards} refers to the number of cards each players starts with. Keep in mind that too many cards will make the bot load slower, so please let it run for a few seconds after someone joins to start the game."
-        }, {
-          name: "Play {color} {value} {chosencolor}",
-          value: "How you play cards. {color} is the color of the card you wants to play, and {value} is the number or figure of the card. {chosencolor} is only used with wildcards, and is the color you decide the next player will have to play."
-        }, {
-          name: "Draw",
-          value: "Pretty simple. If you are unable to play a card, or you just don't want to, you use this command to draw a card."
-        }, {
-          name: "Endgame",
-          value: "ONLY FOR ADMINISTRATORS!\n if a game is bugged or you want to stop a game for whatever reason, you can do so with this command. You need administrator permissions to do this."
-        }
+        .setColor(`#ec1c25`)
+        .setTitle(`Help about commands`)
+        .setAuthor(`Made by Bruckis`, `https://images-ext-1.discordapp.net/external/xXLSVJM6_HvBZ9xla6EIPLdosfanGudNLPw10p4BAUk/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/391929236950351884/9be94849d0be47fe83e50c33c370dd7c.png`, `https://github.com/Bruckis`, )
+        .setDescription(`Here are all the commands the bot has and how to use them`)
+        .addFields({
+              name: "Info",
+              value: "This command provides some rules for the bot as well as basic information it."
+            }, {
+              name: "Startgame {decks} {startings cards}",
+              value: "The main command of the bot. Is used to start the game. {decks} defines the number of decks you want to use (usually you just need 1 because there is a deck reshuffler), but if you want chaos and the possibility of having 25 wildcards in your hand, you can make it so. {starting cards} refers to the number of cards each players starts with. Keep in mind that too many cards will make the bot load slower, so please let it run for a few seconds after someone joins to start the game."
+            }, {
+              name: "Play {color} {value} {chosencolor}",
+              value: "How you play cards. {color} is the color of the card you wants to play, and {value} is the number or figure of the card. {chosencolor} is only used with wildcards, and is the color you decide the next player will have to play."
+            }, {
+              name: "Draw",
+              value: "Pretty simple. If you are unable to play a card, or you just don't want to, you use this command to draw a card."
+            }, {
+              name: "Endgame",
+              value: "ONLY FOR ADMINISTRATORS!\n if a game is bugged or you want to stop a game for whatever reason, you can do so with this command. You need administrator permissions to do this."
+            }
 
-      )
-      .setTimestamp()
-      .setFooter("Thanks for reading and I hope you enjoy your games :)")
+        )
+        .setTimestamp()
+        .setFooter("Thanks for reading and I hope you enjoy your games :)")
     message.channel.send(helpembed);
   }
 
   if (cmd === "info") {
     infoembed = new Discord.MessageEmbed()
-      .setColor(`#ec1c25`)
-      .setTitle(`Information`)
-      .setAuthor(`Made by Bruckis`, `https://images-ext-1.discordapp.net/external/xXLSVJM6_HvBZ9xla6EIPLdosfanGudNLPw10p4BAUk/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/391929236950351884/9be94849d0be47fe83e50c33c370dd7c.png`, `https://github.com/Bruckis`, )
-      .setThumbnail(`https://cdn.discordapp.com/attachments/632895798559899663/809737369783238707/proxy-image.png`)
-      .addField("This is a bot where you and up to 9 other friends can compete in a game of UNO", `Just start me up using startgame and I will do the rest!`)
-      .addField("Rules:", "1. No stacking of draw cards\n2. You draw one card if you are unable to play\n3. You do not have to say uno when you have one card left(because I was too lazy to add it)\n4. You can win on any card(also because I was too lazy to add a filter for that)")
-      .setFooter(`This is actually sort of finished. Executed by ${message.member.user.tag} at ${today.getHours()}:${today.getMinutes()}`)
+        .setColor(`#ec1c25`)
+        .setTitle(`Information`)
+        .setAuthor(`Made by Bruckis`, `https://images-ext-1.discordapp.net/external/xXLSVJM6_HvBZ9xla6EIPLdosfanGudNLPw10p4BAUk/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/391929236950351884/9be94849d0be47fe83e50c33c370dd7c.png`, `https://github.com/Bruckis`, )
+        .setThumbnail(`https://cdn.discordapp.com/attachments/632895798559899663/809737369783238707/proxy-image.png`)
+        .addField("This is a bot where you and up to 9 other friends can compete in a game of UNO", `Just start me up using startgame and I will do the rest!`)
+        .addField("Rules:", "1. No stacking of draw cards\n2. You draw one card if you are unable to play\n3. You do not have to say uno when you have one card left(because I was too lazy to add it)\n4. You can win on any card(also because I was too lazy to add a filter for that)")
+        .setFooter(`This is actually sort of finished. Executed by ${message.member.user.tag} at ${today.getHours()}:${today.getMinutes()}`)
     return message.channel.send(infoembed);
   }
 
@@ -276,11 +277,11 @@ client.on(`message`, async message => { //When a user sends a message
       }; // Adds server id to the games array to stop more than one game running at a time
       games[message.guild.id].players = {};
       let startgameembed = new Discord.MessageEmbed() // Makes a new embed with the following items
-        .setColor(`#ec1c25`)
-        .setTitle(`New game of UNO was started! React with <:UNOREACT:825375265546960966> on this message to join! You have 5 minutes, or you can start the game by reacting with ✅`)
-        .setAuthor(`Game started by ${message.member.user.username}`)
-        .setDescription(`There are currently ${Object.keys(games[message.guild.id]["players"]).length} players in the game`)
-        .setTimestamp()
+          .setColor(`#ec1c25`)
+          .setTitle(`New game of UNO was started! React with <:UNOREACT:825375265546960966> on this message to join! You have 5 minutes, or you can start the game by reacting with ✅`)
+          .setAuthor(`Game started by ${message.member.user.username}`)
+          .setDescription(`There are currently ${Object.keys(games[message.guild.id]["players"]).length} players in the game`)
+          .setTimestamp()
 
 
       let msg = await message.channel.send(startgameembed);
@@ -311,11 +312,11 @@ client.on(`message`, async message => { //When a user sends a message
               games[message.guild.id].players[user.id].push(userinfo);
 
               startgameembed = new Discord.MessageEmbed() // Makes a new embed with the following items
-                .setColor(`#ec1c25`)
-                .setTitle(`New game of UNO was started! React with <:UNOREACT:825375265546960966> on this message to join! You have 5 minutes, or you can start the game by reacting with ✅`)
-                .setAuthor(`Game started by ${message.member.user.username}`)
-                .setDescription(`There are currently ${Object.keys(games[message.guild.id]["players"]).length} player(s) in the game`)
-                .setTimestamp()
+                  .setColor(`#ec1c25`)
+                  .setTitle(`New game of UNO was started! React with <:UNOREACT:825375265546960966> on this message to join! You have 5 minutes, or you can start the game by reacting with ✅`)
+                  .setAuthor(`Game started by ${message.member.user.username}`)
+                  .setDescription(`There are currently ${Object.keys(games[message.guild.id]["players"]).length} player(s) in the game`)
+                  .setTimestamp()
               msg.edit({
                 embed: startgameembed
               })
@@ -336,9 +337,7 @@ client.on(`message`, async message => { //When a user sends a message
                 gamestarted = true;
                 generateDeck(numberofdecks);
                 for (let foreachplayer in games[message.guild.id].players) {
-                  console.log(startingcards);
                   for (givecards = 0; givecards < startingcards; givecards++) {
-                    console.log("INSIDE")
                     let randint = Math.floor(Math.random() * deck.length + 1)
                     games[message.guild.id].players[foreachplayer].push(deck[randint])
                     deck.splice(randint, 1);
@@ -347,40 +346,42 @@ client.on(`message`, async message => { //When a user sends a message
                 for (let foreachplayer in games[message.guild.id].players) {
                   let channel = client.users.cache.get(games[message.guild.id].players[foreachplayer][0].id);
                   let cards = []
+                  console.log(games)
                   for (let foreachcard in games[message.guild.id].players[foreachplayer]) {
                     if (Object.keys(games[message.guild.id].players[foreachplayer][foreachcard]).includes('color')) {
                       cards.push(`${games[message.guild.id].players[foreachplayer][foreachcard].color} ${games[message.guild.id].players[foreachplayer][foreachcard].value}`)
                     }
                   }
                   let hand = new Discord.MessageEmbed()
-                    .setColor(`#ec1c25`)
-                    .setTitle(`Game started in ${message.guild.name}!`)
-                    .addFields({
-                      name: "This is your hand:",
-                      value: cards.join("\n")
-                    })
-                    .setTimestamp()
+                      .setColor(`#ec1c25`)
+                      .setTitle(`Game started in ${message.guild.name}!`)
+                      .addFields({
+                        name: "This is your hand:",
+                        value: cards.join("\n")
+                      })
+                      .setTimestamp()
                   channel.send(hand);
                 }
                 var notwildcard = false
                 let randint
                 wildcardloop:
-                  while (notwildcard == false) {
-                    randint = Math.floor(Math.random() * deck.length + 1)
-                    if (Number.isFinite(deck[randint].value)) {
-                      notwildcard = true;
-                      break wildcardloop;
+                    while (notwildcard == false) {
+                      randint = Math.floor(Math.random() * deck.length + 1)
+                      console.log(deck[randint])
+                      if (Number.isFinite(deck[randint].value)) {
+                        notwildcard = true;
+                        break wildcardloop;
 
+                      }
                     }
-                  }
                 currentcard.push(deck[randint]);
                 deck.splice(randint, 1);
 
                 let game = new Discord.MessageEmbed() // Makes a new embed with the following items
-                  .setColor(`#ec1c25`)
-                  .setAuthor(`Game started by ${message.member.user.username}`)
-                  .setTimestamp()
-                  .setDescription(`The game has begun! The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                    .setColor(`#ec1c25`)
+                    .setAuthor(`Game started by ${message.member.user.username}`)
+                    .setTimestamp()
+                    .setDescription(`The game has begun! The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
                 message.channel.send(game);
                 isstopped = true;
               }
@@ -388,6 +389,7 @@ client.on(`message`, async message => { //When a user sends a message
             } else {
               message.channel.send(`${Object.keys(games[message.guild.id].players).length} players is not enough to start a game. You need at least 3 players.`)
             }
+
 
             break;
 
@@ -416,41 +418,41 @@ client.on(`message`, async message => { //When a user sends a message
               }
             }
             let hand = new Discord.MessageEmbed()
-              .setColor(`#ec1c25`)
-              .setTitle(`Game started in ${message.guild.name}!`)
-              .addFields({
-                name: "This is your hand:",
-                value: cards.join("\n ")
-              })
-              .setTimestamp()
+                .setColor(`#ec1c25`)
+                .setTitle(`Game started in ${message.guild.name}!`)
+                .addFields({
+                  name: "This is your hand:",
+                  value: cards.join("\n ")
+                })
+                .setTimestamp()
             channel.send(hand);
           }
           var notwildcard = false
           let randint
           wildcardloop:
-            while (notwildcard == false) {
-              randint = Math.floor(Math.random() * deck.length + 1)
-              if (Number.isFinite(deck[randint].value)) {
-                notwildcard = true;
-                break wildcardloop;
+              while (notwildcard == false) {
+                randint = Math.floor(Math.random() * deck.length + 1)
+                if (Number.isFinite(deck[randint].value)) {
+                  notwildcard = true;
+                  break wildcardloop;
 
+                }
               }
-            }
           currentcard.push(deck[randint]);
           deck.splice(randint, 1);
 
           let game = new Discord.MessageEmbed() // Makes a new embed with the following items
-            .setColor(`#ec1c25`)
-            .setAuthor(`Game started by ${message.member.user.username}`)
-            .setTimestamp()
-            .setDescription(`The game has begun! The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+              .setColor(`#ec1c25`)
+              .setAuthor(`Game started by ${message.member.user.username}`)
+              .setTimestamp()
+              .setDescription(`The game has begun! The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
           message.channel.send(game);
         } else {
           let notenoughplayers = new Discord.MessageEmbed() // Makes a new embed with the following items
-            .setColor(`#ec1c25`)
-            .setAuthor(`There are not enough players to start the game`)
-            .setTimestamp()
-            .setDescription(`${Object.keys(games[message.guild.id].players).length} is not enough players to start the game. You need to be at least 3 players.`)
+              .setColor(`#ec1c25`)
+              .setAuthor(`There are not enough players to start the game`)
+              .setTimestamp()
+              .setDescription(`${Object.keys(games[message.guild.id].players).length} is not enough players to start the game. You need to be at least 3 players.`)
           message.channel.send(notenoughplayers);
           delete games[message.guild.id];
           currentcard.splice(0, 1)
@@ -460,7 +462,7 @@ client.on(`message`, async message => { //When a user sends a message
         isstopped = true;
       });
     }
-
+    console.log(games)
   }
 
   if (cmd === "play") {
@@ -588,10 +590,10 @@ client.on(`message`, async message => { //When a user sends a message
           if (Object.keys(games[message.guild.id].players[message.member.id]).length - 1 == 0) {
             console.log("WINNER!")
             let winembed = new Discord.MessageEmbed()
-              .setColor(`#ec1c25`)
-              .setTitle(`We have a winner!`)
-              .setDescription(`<@${message.member.id}> played all their cards and won! Here, have a trophy!`)
-              .setImage('http://pngimg.com/uploads/golden_cup/golden_cup_PNG94601.png')
+                .setColor(`#ec1c25`)
+                .setTitle(`We have a winner!`)
+                .setDescription(`<@${message.member.id}> played all their cards and won! Here, have a trophy!`)
+                .setImage('http://pngimg.com/uploads/golden_cup/golden_cup_PNG94601.png')
             await message.channel.send(winembed)
             await delete games[message.guild.id];
             await currentcard.splice(0, 1)
@@ -605,13 +607,13 @@ client.on(`message`, async message => { //When a user sends a message
               }
             }
             let hand = new Discord.MessageEmbed()
-              .setColor(`#ec1c25`)
-              .setTitle(`You played a card in ${message.guild.name}!`)
-              .addFields({
-                name: "This is your hand:",
-                value: cards.join("\n ")
-              })
-              .setTimestamp()
+                .setColor(`#ec1c25`)
+                .setTitle(`You played a card in ${message.guild.name}!`)
+                .addFields({
+                  name: "This is your hand:",
+                  value: cards.join("\n ")
+                })
+                .setTimestamp()
             await channel.send(hand);
           }
           if (playedvalue === "changecolor") {
@@ -624,12 +626,12 @@ client.on(`message`, async message => { //When a user sends a message
             }
             currentcard[0].color = chosencolor;
             game = new Discord.MessageEmbed() // Makes a new embed with the following items
-              .setColor(`#ec1c25`)
-              .setTimestamp()
-              .setTitle(`A wildcard has been played!`)
-              .setDescription(`<@${currentplayerid}> changed the color to ${chosencolor}! \nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-              .setTimestamp()
-              .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+                .setColor(`#ec1c25`)
+                .setTimestamp()
+                .setTitle(`A wildcard has been played!`)
+                .setDescription(`<@${currentplayerid}> changed the color to ${chosencolor}! \nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                .setTimestamp()
+                .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
             await message.channel.send(game);
           } else if (playedvalue === "draw4") {
             if (games[message.guild.id].isreversed == false) {
@@ -674,12 +676,12 @@ client.on(`message`, async message => { //When a user sends a message
             }
             currentcard[0].color = chosencolor;
             game = new Discord.MessageEmbed() // Makes a new embed with the following items
-              .setColor(`#ec1c25`)
-              .setTimestamp()
-              .setTitle(`A wildcard has been played!`)
-              .setDescription(`<@${currentplayerid}> made <@${nextplayerid}> draw 4 cards and changed the color to ${chosencolor}! \nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-              .setTimestamp()
-              .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+                .setColor(`#ec1c25`)
+                .setTimestamp()
+                .setTitle(`A wildcard has been played!`)
+                .setDescription(`<@${currentplayerid}> made <@${nextplayerid}> draw 4 cards and changed the color to ${chosencolor}! \nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                .setTimestamp()
+                .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
             await message.channel.send(game);
           } else if (playedvalue === "reverse") {
             if (games[message.guild.id].isreversed == false) games[message.guild.id].isreversed = true;
@@ -692,12 +694,12 @@ client.on(`message`, async message => { //When a user sends a message
               else turn--
             }
             game = new Discord.MessageEmbed() // Makes a new embed with the following items
-              .setColor(`#ec1c25`)
-              .setTimestamp()
-              .setTitle(`A reverse card has been played!`)
-              .setDescription(`The play order has been reversed! The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-              .setTimestamp()
-              .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+                .setColor(`#ec1c25`)
+                .setTimestamp()
+                .setTitle(`A reverse card has been played!`)
+                .setDescription(`The play order has been reversed! The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                .setTimestamp()
+                .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
             await message.channel.send(game);
           } // DONE
           else if (playedvalue === "draw2") {
@@ -742,12 +744,12 @@ client.on(`message`, async message => { //When a user sends a message
               }
             }
             game = new Discord.MessageEmbed() // Makes a new embed with the following items
-              .setColor(`#ec1c25`)
-              .setTimestamp()
-              .setTitle(`A draw 2 card has been played!`)
-              .setDescription(`<@${currentplayerid}> made <@${nextplayerid}> draw 2 cards! \nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-              .setTimestamp()
-              .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+                .setColor(`#ec1c25`)
+                .setTimestamp()
+                .setTitle(`A draw 2 card has been played!`)
+                .setDescription(`<@${currentplayerid}> made <@${nextplayerid}> draw 2 cards! \nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                .setTimestamp()
+                .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
             await message.channel.send(game);
           } // DONE
           else if (playedvalue === "skip") {
@@ -783,12 +785,12 @@ client.on(`message`, async message => { //When a user sends a message
               else turn = turn - 2;
             }
             game = new Discord.MessageEmbed() // Makes a new embed with the following items
-              .setColor(`#ec1c25`)
-              .setTimestamp()
-              .setTitle(`A skip card has been played!`)
-              .setDescription(`<@${currentplayerid}> skipped <@${nextplayerid}>!\nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-              .setTimestamp()
-              .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+                .setColor(`#ec1c25`)
+                .setTimestamp()
+                .setTitle(`A skip card has been played!`)
+                .setDescription(`<@${currentplayerid}> skipped <@${nextplayerid}>!\nThe current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                .setTimestamp()
+                .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
             await message.channel.send(game);
           } // DONE
           else { // if a normal card is played
@@ -801,13 +803,13 @@ client.on(`message`, async message => { //When a user sends a message
               else turn--
             }
             game = new Discord.MessageEmbed() // Makes a new embed with the following items
-              .setColor(`#ec1c25`)
-              .setTimestamp()
-              .setTitle(`A normal card has been played!`)
-              .setDescription(`The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+                .setColor(`#ec1c25`)
+                .setTimestamp()
+                .setTitle(`A normal card has been played!`)
+                .setDescription(`The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
 
-              .setTimestamp()
-              .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+                .setTimestamp()
+                .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
             await message.channel.send(game);
           }
 
@@ -830,6 +832,9 @@ client.on(`message`, async message => { //When a user sends a message
   }
 
   if (cmd === "draw") {
+    console.log(games)
+    console.log(games[message.guild.id])
+    console.log(message.guild.id)
     if (!games[message.guild.id] || gamestarted == false) {
       message.channel.send("There is currently no game currently playing in this server! You can start one by using startgame");
     } else {
@@ -859,14 +864,14 @@ client.on(`message`, async message => { //When a user sends a message
         }
       }
       let hand = new Discord.MessageEmbed()
-        .setColor(`#ec1c25`)
-        .setTitle(`You drew a card in ${message.guild.name}!`)
-        .setDescription(`The card you drew is a ${deck[randint].color} ${deck[randint].value}`)
-        .addFields({
-          name: "This is your hand:",
-          value: cards.join("\n ")
-        })
-        .setTimestamp()
+          .setColor(`#ec1c25`)
+          .setTitle(`You drew a card in ${message.guild.name}!`)
+          .setDescription(`The card you drew is a ${deck[randint].color} ${deck[randint].value}`)
+          .addFields({
+            name: "This is your hand:",
+            value: cards.join("\n ")
+          })
+          .setTimestamp()
       channel.send(hand);
       deck.splice(randint, 1);
 
@@ -875,22 +880,22 @@ client.on(`message`, async message => { //When a user sends a message
         if (turn == Object.keys(games[message.guild.id].players).length - 1) turn = 0;
         else turn++
         game = new Discord.MessageEmbed() // Makes a new embed with the following items
-          .setColor(`#ec1c25`)
-          .setTimestamp()
-          .setTitle(`${message.member.user.username} drew a card!`)
-          .setDescription(`The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-          .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+            .setColor(`#ec1c25`)
+            .setTimestamp()
+            .setTitle(`${message.member.user.username} drew a card!`)
+            .setDescription(`The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+            .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
         await message.channel.send(game);
 
       } else if (games[message.guild.id].isreversed == true) {
         if (turn == 0) turn = Object.keys(games[message.guild.id].players).length - 1;
         else turn--
         game = new Discord.MessageEmbed() // Makes a new embed with the following items
-          .setColor(`#ec1c25`)
-          .setTimestamp()
-          .setTitle(`${message.member.user.username} drew a card!`)
-          .setDescription(`The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
-          .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
+            .setColor(`#ec1c25`)
+            .setTimestamp()
+            .setTitle(`${message.member.user.username} drew a card!`)
+            .setDescription(`The current card is a ${currentcard[0].color} ${currentcard[0].value} and it is <@${Object.keys(games[message.guild.id].players)[turn]}>'s turn`)
+            .setFooter(`${message.member.user.username} now has ${Object.keys(games[message.guild.id].players[message.member.id]).length - 1} card(s) in their hand`)
         await message.channel.send(game);
       }
       if (deck.length < 5) {
